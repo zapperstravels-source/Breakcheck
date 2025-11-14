@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8">
+<body style="font-family:sans-serif;background:#eef2ff;padding:40px">
+  <div style="max-width:400px;margin:auto;background:white;padding:20px;border-radius:10px;text-align:center;box-shadow:0 0 20px rgba(0,0,0,0.1)">
+    <h2>Break Tracker</h2>
+    <p id="status">Ready</p>
+    <button onclick="mark('start')">Start Break</button>
+    <button onclick="mark('stop')" style="margin-left:10px">Stop Break</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const uid = params.get("uid") || "Unknown";
+    const BACKEND = "https://script.google.com/macros/s/AKfycbxaR7KdPFpNngm4BrGQvocxYfFDiYxyQuUfXhAnaOeWXKqiwkjMyMVJEcFdqWls9GQk/exec";
+
+    async function mark(action){
+      document.getElementById("status").innerText = "Sending...";
+
+      const res = await fetch(BACKEND, {
+        method: "POST",
+        body: JSON.stringify({
+          uid,
+          action,
+          ts: new Date().toISOString()
+        }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const j = await res.json();
+      if(j.ok){
+        document.getElementById("status").innerText =
+          action + " recorded at " + j.recordedAt;
+      } else {
+        document.getElementById("status").innerText = "Error: " + j.error;
+      }
+    }
+  </script>
+</body>
